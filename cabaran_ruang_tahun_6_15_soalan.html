@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cabaran Pakar Ruang: Tahun 6</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: #e0f2fe;
+            background-image: radial-gradient(#bae6fd 2px, transparent 2px);
+            background-size: 30px 30px;
+        }
+
+        .bounce-slow {
+            animation: bounce 3s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-20px);}
+            60% {transform: translateY(-10px);}
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .btn-option {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .btn-option:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-option:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="game-container" class="bg-white rounded-[2rem] shadow-2xl p-6 md:p-8 w-full max-w-3xl border-8 border-sky-400 relative overflow-hidden">
+        
+        <!-- Skrin 1: Mula -->
+        <div id="start-screen" class="text-center space-y-6 fade-in">
+            <div class="flex justify-center mb-4">
+                <svg class="w-40 h-40 text-sky-500 bounce-slow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <!-- Icon kiub ringkas -->
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                </svg>
+            </div>
+            <h1 class="text-4xl md:text-6xl font-bold text-sky-600 drop-shadow-sm leading-tight">Misi Pakar Ruang!</h1>
+            <p class="text-xl text-gray-600 font-medium">Matematik Tahun 6<br>15 Soalan: Perimeter, Luas, Isipadu & Luas Permukaan.</p>
+            <button onclick="startGame()" class="mt-8 bg-gradient-to-r from-sky-400 to-blue-500 text-white font-bold py-4 px-12 rounded-full text-2xl hover:from-sky-500 hover:to-blue-600 transform hover:scale-110 transition duration-300 shadow-xl border-b-4 border-blue-700 active:border-b-0 active:translate-y-1">
+                🚀 Mula Misi!
+            </button>
+        </div>
+
+        <!-- Skrin 2: Permainan -->
+        <div id="game-screen" class="hidden">
+            <!-- Header Skor dan Progress -->
+            <div class="flex justify-between items-center mb-6">
+                <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-2xl font-bold border-2 border-blue-200">
+                    Soalan: <span id="current-question" class="text-xl">1</span> / <span id="total-questions">15</span>
+                </div>
+                <div class="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-2xl font-bold flex items-center gap-2 border-2 border-yellow-300 shadow-sm">
+                    ⭐ Skor: <span id="score" class="text-xl">0</span>
+                </div>
+            </div>
+
+            <!-- Visual / Gambar Soalan -->
+            <div id="visual-container" class="w-full h-48 sm:h-56 bg-slate-50 rounded-2xl mb-6 flex items-center justify-center border-4 border-dashed border-slate-300 p-4">
+                <!-- SVG akan dimuatkan di sini -->
+            </div>
+
+            <!-- Teks Soalan -->
+            <h2 id="question-text" class="text-xl md:text-2xl font-bold text-gray-800 mb-6 text-center leading-relaxed"></h2>
+
+            <!-- Pilihan Jawapan -->
+            <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Butang akan dimuatkan di sini -->
+            </div>
+            
+            <!-- Maklum Balas & Rationale -->
+            <div id="feedback" class="mt-6 text-center hidden rounded-2xl py-4 px-6 fade-in shadow-inner">
+                <p id="feedback-message" class="font-bold text-2xl mb-2"></p>
+                <p id="feedback-rationale" class="text-base md:text-lg font-medium"></p>
+                <button id="next-btn" onclick="nextQuestion()" class="mt-4 bg-gray-800 text-white font-bold py-2 px-8 rounded-full text-lg hover:bg-black transition shadow-lg hidden mx-auto">
+                    Seterusnya ➡️
+                </button>
+            </div>
+        </div>
+
+        <!-- Skrin 3: Penamat -->
+        <div id="end-screen" class="hidden text-center space-y-6 fade-in">
+            <h2 class="text-5xl font-bold text-gray-800 mb-2">Tamat Misi! 🏁</h2>
+            
+            <div class="bg-sky-50 rounded-[2rem] p-8 inline-block mt-4 shadow-inner border-4 border-sky-200 w-full max-w-sm">
+                <p class="text-2xl font-semibold text-sky-800 mb-2">Skor Akhir Anda:</p>
+                <div class="flex justify-center items-baseline gap-2">
+                    <p class="text-7xl font-black text-sky-600"><span id="final-score">0</span></p>
+                    <p class="text-3xl font-bold text-sky-400">/ 15</p>
+                </div>
+            </div>
+
+            <div class="mt-8">
+                <p id="end-message" class="text-2xl font-bold px-4"></p>
+                <p id="end-submessage" class="text-lg text-gray-600 mt-2"></p>
+            </div>
+
+            <button onclick="resetGame()" class="mt-8 bg-green-500 text-white font-bold py-4 px-10 rounded-full text-xl hover:bg-green-600 transform hover:scale-110 transition duration-300 shadow-xl border-b-4 border-green-700 active:border-b-0 active:translate-y-1">
+                🔄 Main Semula
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // Data 15 Soalan
+        const quizData = [
+            { // S1 - Isipadu Kubus Asas
+                question: "1. Berapakah isipadu sebuah kubus yang mempunyai panjang sisi 4 cm?",
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full max-w-[12rem]"><path d="M30 30 h40 v40 h-40 z" fill="#38bdf8" stroke="#0284c7" stroke-width="2"/><path d="M30 30 l15 -15 h40 l-15 15 z" fill="#7dd3fc" stroke="#0284c7" stroke-width="2"/><path d="M70 30 l15 -15 v40 l-15 15 z" fill="#0ea5e9" stroke="#0284c7" stroke-width="2"/><text x="40" y="75" font-size="8" font-weight="bold" fill="#0c4a6e">4 cm</text></svg>`,
+                options: ["16 cm³", "64 cm³", "32 cm³", "12 cm³"],
+                correct: 1,
+                rationale: "Isipadu kubus = panjang × lebar × tinggi. Oleh kerana sisinya sama, 4cm × 4cm × 4cm = 64 cm³."
+            },
+            { // S2 - Luas Segi Empat Tepat
+                question: "2. Rajah menunjukkan sebuah segi empat tepat. Hitung luas segi empat tepat tersebut.",
+                svg: `<svg viewBox="0 0 140 80" class="w-full h-full max-w-[14rem]"><rect x="10" y="10" width="120" height="60" fill="#fde047" stroke="#ca8a04" stroke-width="2"/><text x="65" y="77" font-size="8" font-weight="bold" fill="#854d0e">8 cm</text><text x="-5" y="45" font-size="8" font-weight="bold" fill="#854d0e" transform="rotate(-90 10 40)">5 cm</text></svg>`,
+                options: ["40 cm²", "13 cm²", "26 cm²", "45 cm²"],
+                correct: 0,
+                rationale: "Luas segi empat tepat = panjang × lebar. 8 cm × 5 cm = 40 cm²."
+            },
+            { // S3 - Perimeter Segi Tiga
+                question: "3. Sebuah segi tiga sama sisi mempunyai perimeter 30 cm. Berapakah panjang bagi SATU sisinya?",
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full max-w-[10rem]"><polygon points="50,10 90,80 10,80" fill="#86efac" stroke="#16a34a" stroke-width="2"/><text x="20" y="95" font-size="8" font-weight="bold" fill="#14532d">Perimeter = 30 cm</text></svg>`,
+                options: ["15 cm", "90 cm", "10 cm", "5 cm"],
+                correct: 2,
+                rationale: "Segi tiga sama sisi mempunyai 3 sisi yang sama panjang. Untuk cari 1 sisi, bahagikan perimeter dengan 3. (30 cm ÷ 3 = 10 cm)."
+            },
+            { // S4 - Luas Permukaan Kubus
+                question: "4. Kira luas permukaan bagi sebuah kubus yang bersaiz 3 cm.",
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full max-w-[10rem]"><rect x="35" y="35" width="30" height="30" fill="#fca5a5" stroke="#dc2626" stroke-width="1.5"/><rect x="35" y="5" width="30" height="30" fill="#fca5a5" stroke="#dc2626" stroke-width="1.5"/><rect x="35" y="65" width="30" height="30" fill="#fca5a5" stroke="#dc2626" stroke-width="1.5"/><rect x="5" y="35" width="30" height="30" fill="#fca5a5" stroke="#dc2626" stroke-width="1.5"/><rect x="65" y="35" width="30" height="30" fill="#fca5a5" stroke="#dc2626" stroke-width="1.5"/><text x="43" y="55" font-size="8" font-weight="bold" fill="#7f1d1d">3 cm</text></svg>`,
+                options: ["27 cm²", "9 cm²", "36 cm²", "54 cm²"],
+                correct: 3,
+                rationale: "Kubus mempunyai 6 muka berbentuk segi empat sama. Luas 1 muka = 3×3 = 9cm². Jumlah luas permukaan = 6 muka × 9cm² = 54 cm²."
+            },
+            { // S5 - Isipadu Kuboid Asas
+                question: "5. Berapakah isipadu sebuah kotak berbentuk kuboid dengan ukuran panjang 10 cm, lebar 4 cm dan tinggi 3 cm?",
+                svg: `<svg viewBox="0 0 120 80" class="w-full h-full max-w-[14rem]"><path d="M20 30 h70 v30 h-70 z" fill="#d8b4fe" stroke="#9333ea" stroke-width="2"/><path d="M20 30 l15 -15 h70 l-15 15 z" fill="#e9d5ff" stroke="#9333ea" stroke-width="2"/><path d="M90 30 l15 -15 v30 l-15 15 z" fill="#c084fc" stroke="#9333ea" stroke-width="2"/><text x="45" y="68" font-size="8" font-weight="bold" fill="#581c87">10 cm</text><text x="4" y="50" font-size="8" font-weight="bold" fill="#581c87">3 cm</text><text x="75" y="25" font-size="8" font-weight="bold" fill="#581c87">4 cm</text></svg>`,
+                options: ["120 cm³", "17 cm³", "60 cm³", "40 cm³"],
+                correct: 0,
+                rationale: "Isipadu kuboid = Panjang × Lebar × Tinggi. 10 cm × 4 cm × 3 cm = 120 cm³."
+            },
+            { // S6 - Luas Segi Tiga
+                question: "6. Rajah menunjukkan sebuah segi tiga. Panjang tapaknya ialah 6 cm dan tingginya ialah 8 cm. Kira luasnya.",
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full max-w-[10rem]"><polygon points="10,90 90,90 50,10" fill="#fdba74" stroke="#ea580c" stroke-width="2"/><line x1="50" y1="10" x2="50" y2="90" stroke="#9a3412" stroke-dasharray="2" stroke-width="1"/><text x="45" y="98" font-size="8" font-weight="bold" fill="#7c2d12">6 cm</text><text x="52" y="55" font-size="8" font-weight="bold" fill="#7c2d12">8 cm</text></svg>`,
+                options: ["48 cm²", "24 cm²", "14 cm²", "32 cm²"],
+                correct: 1,
+                rationale: "Luas segi tiga = ½ × tapak × tinggi. ½ × 6 cm × 8 cm = 24 cm²."
+            },
+            { // S7 - Perimeter Bentuk Gabungan
+                question: "7. Sebuah segi empat sama (sisi 5 cm) dicantumkan dengan sebuah segi tiga sama sisi (sisi 5 cm). Berapakah perimeter keseluruhan bentuk ini?",
+                svg: `<svg viewBox="0 0 100 120" class="w-full h-full max-w-[8rem]"><rect x="25" y="60" width="50" height="50" fill="#a7f3d0" stroke="#059669" stroke-width="2"/><polygon points="25,60 75,60 50,15" fill="#a7f3d0" stroke="#059669" stroke-width="2"/><line x1="25" y1="60" x2="75" y2="60" stroke="#059669" stroke-dasharray="2" stroke-width="2"/><text x="15" y="90" font-size="8" font-weight="bold" fill="#064e3b">5cm</text></svg>`,
+                options: ["30 cm", "20 cm", "25 cm", "35 cm"],
+                correct: 2,
+                rationale: "Perimeter ialah ukur keliling luar bentuk sahaja. Bentuk ini mempunyai 5 sisi luar yang setiap satunya berukuran 5 cm. (5 + 5 + 5 + 5 + 5 = 25 cm). Garis sempadan di tengah TIDAK dikira."
+            },
+            { // S8 - Isipadu Gabungan
+                question: "8. Satu blok kubus bersisi 2 cm diletakkan di atas sebuah kuboid berukuran 5 cm (panjang), 2 cm (lebar) dan 3 cm (tinggi). Hitung jumlah isipadu bentuk gabungan ini.",
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full max-w-[12rem]"><path d="M20 50 h60 v30 h-60 z" fill="#fca5a5" stroke="#b91c1c" stroke-width="2"/><path d="M20 50 l10 -10 h60 l-10 10 z" fill="#fecaca" stroke="#b91c1c" stroke-width="2"/><path d="M80 50 l10 -10 v30 l-10 10 z" fill="#ef4444" stroke="#b91c1c" stroke-width="2"/><path d="M40 30 h20 v20 h-20 z" fill="#93c5fd" stroke="#1d4ed8" stroke-width="2"/><path d="M40 30 l10 -10 h20 l-10 10 z" fill="#bfdbfe" stroke="#1d4ed8" stroke-width="2"/><path d="M60 30 l10 -10 v20 l-10 10 z" fill="#60a5fa" stroke="#1d4ed8" stroke-width="2"/><text x="45" y="75" font-size="8" font-weight="bold" fill="#7f1d1d">5 cm</text></svg>`,
+                options: ["38 cm³", "30 cm³", "46 cm³", "24 cm³"],
+                correct: 0,
+                rationale: "Isipadu kubus = 2×2×2 = 8 cm³. Isipadu kuboid = 5×2×3 = 30 cm³. Jumlah isipadu = 8 + 30 = 38 cm³."
+            },
+            { // S9 - Luas Gabungan
+                question: "9. Sebuah dewan terdiri daripada kawasan segi empat tepat berukuran 10m × 4m, dan ruang legar segi empat sama bersisi 4m. Berapakah jumlah luas lantai dewan itu?",
+                svg: `<svg viewBox="0 0 150 100" class="w-full h-full max-w-[14rem]"><rect x="10" y="50" width="100" height="40" fill="#fef08a" stroke="#a16207" stroke-width="2"/><rect x="110" y="50" width="40" height="40" fill="#fde047" stroke="#a16207" stroke-width="2"/><text x="50" y="75" font-size="8" font-weight="bold" fill="#713f12">10m x 4m</text><text x="115" y="75" font-size="8" font-weight="bold" fill="#713f12">4m x 4m</text></svg>`,
+                options: ["40 m²", "56 m²", "144 m²", "60 m²"],
+                correct: 1,
+                rationale: "Luas segi empat tepat = 10×4 = 40m². Luas segi empat sama = 4×4 = 16m². Jumlah luas = 40 + 16 = 56 m²."
+            },
+            { // S10 - Cari Sisi dari Luas
+                question: "10. Luas sebuah kebun berbentuk segi empat sama ialah 81 m². Berapakah panjang salah satu sisi kebun tersebut?",
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full max-w-[10rem]"><rect x="20" y="20" width="60" height="60" fill="#d9f99d" stroke="#4d7c0f" stroke-width="2"/><text x="30" y="55" font-size="8" font-weight="bold" fill="#3f6212">Luas = 81 m²</text><text x="45" y="15" font-size="10" font-weight="bold" fill="#3f6212">?</text></svg>`,
+                options: ["18 m", "8 m", "40.5 m", "9 m"],
+                correct: 3,
+                rationale: "Luas segi empat sama = sisi × sisi. Nombor yang didarab dengan dirinya sendiri menghasilkan 81 ialah 9. (9 × 9 = 81). Jadi, panjang sisi ialah 9 m."
+            },
+            { // S11 - Cari Tinggi dari Isipadu
+                question: "11. Sebuah akuarium kuboid mempunyai isipadu 200 cm³. Jika panjangnya 10 cm dan lebarnya 4 cm, berapakah tingginya?",
+                svg: `<svg viewBox="0 0 120 100" class="w-full h-full max-w-[12rem]"><path d="M20 40 h70 v40 h-70 z" fill="#bae6fd" stroke="#0369a1" stroke-width="2"/><path d="M20 40 l15 -15 h70 l-15 15 z" fill="#e0f2fe" stroke="#0369a1" stroke-width="2"/><path d="M90 40 l15 -15 v40 l-15 15 z" fill="#7dd3fc" stroke="#0369a1" stroke-width="2"/><text x="45" y="70" font-size="8" font-weight="bold" fill="#075985">V = 200 cm³</text><text x="4" y="65" font-size="10" font-weight="bold" fill="#075985">?</text></svg>`,
+                options: ["10 cm", "5 cm", "8 cm", "4 cm"],
+                correct: 1,
+                rationale: "Isipadu = Panjang × Lebar × Tinggi. 200 = 10 × 4 × Tinggi. Maka, 200 = 40 × Tinggi. Tinggi = 200 ÷ 40 = 5 cm."
+            },
+            { // S12 - Perimeter Segi Empat Tepat
+                question: "12. Sebuah bingkai gambar berbentuk segi empat tepat berukuran 12 cm panjang dan 7 cm lebar. Berapakah perimeternya?",
+                svg: `<svg viewBox="0 0 140 100" class="w-full h-full max-w-[14rem]"><rect x="10" y="20" width="120" height="60" fill="none" stroke="#6b7280" stroke-width="6"/><text x="65" y="45" font-size="8" font-weight="bold" fill="#374151">Gambar</text><text x="65" y="15" font-size="8" font-weight="bold" fill="#374151">12 cm</text><text x="132" y="55" font-size="8" font-weight="bold" fill="#374151">7 cm</text></svg>`,
+                options: ["19 cm", "84 cm", "38 cm", "42 cm"],
+                correct: 2,
+                rationale: "Perimeter segi empat tepat = (Panjang × 2) + (Lebar × 2) ATAU Panjang + Lebar + Panjang + Lebar. (12+12) + (7+7) = 24 + 14 = 38 cm."
+            },
+            { // S13 - Luas Permukaan Kuboid
+                question: "13. Cari jumlah luas permukaan untuk sebuah kotak yang berukuran 4 cm (panjang), 3 cm (lebar) dan 2 cm (tinggi).",
+                svg: `<svg viewBox="0 0 120 80" class="w-full h-full max-w-[12rem]"><path d="M20 30 h50 v20 h-50 z" fill="#fecdd3" stroke="#be123c" stroke-width="1.5"/><path d="M20 30 l15 -15 h50 l-15 15 z" fill="#ffe4e6" stroke="#be123c" stroke-width="1.5"/><path d="M70 30 l15 -15 v20 l-15 15 z" fill="#fda4af" stroke="#be123c" stroke-width="1.5"/><text x="40" y="45" font-size="8" font-weight="bold" fill="#881337">4cm</text></svg>`,
+                options: ["52 cm²", "24 cm²", "48 cm²", "26 cm²"],
+                correct: 0,
+                rationale: "Luas permukaan kuboid = 2(P×L) + 2(P×T) + 2(L×T). = 2(4×3) + 2(4×2) + 2(3×2). = 2(12) + 2(8) + 2(6) = 24 + 16 + 12 = 52 cm²."
+            },
+            { // S14 - Cari Tapak Segi Tiga
+                question: "14. Luas sebuah segi tiga bersudut tegak ialah 30 cm². Jika tingginya ialah 6 cm, berapakah panjang tapaknya?",
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full max-w-[10rem]"><polygon points="20,80 80,80 20,20" fill="#c7d2fe" stroke="#4338ca" stroke-width="2"/><text x="35" y="65" font-size="8" font-weight="bold" fill="#312e81">Luas = 30cm²</text><text x="5" y="55" font-size="8" font-weight="bold" fill="#312e81">6cm</text><text x="45" y="95" font-size="10" font-weight="bold" fill="#312e81">?</text></svg>`,
+                options: ["5 cm", "10 cm", "15 cm", "12 cm"],
+                correct: 1,
+                rationale: "Rumus: Luas = (Tapak × Tinggi) ÷ 2. Maka, 30 = (Tapak × 6) ÷ 2. Pindahkan ÷2 menjadi ×2 (30 × 2 = 60). Maka 60 = Tapak × 6. Tapak = 60 ÷ 6 = 10 cm."
+            },
+            { // S15 - Penyelesaian Masalah Isipadu
+                question: "15. Sebuah tangki air berbentuk kubus berukuran 10 cm x 10 cm x 10 cm diisi air sehingga SEPARUH penuh. Berapakah isipadu air di dalam tangki tersebut?",
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full max-w-[10rem]"><path d="M20 20 h60 v60 h-60 z" fill="none" stroke="#64748b" stroke-width="2"/><path d="M20 50 h60 v30 h-60 z" fill="#38bdf8" opacity="0.6"/><path d="M20 50 l10 -10 h60 l-10 10 z" fill="#7dd3fc" opacity="0.7"/><text x="45" y="88" font-size="8" font-weight="bold" fill="#334155">10 cm</text><text x="30" y="65" font-size="8" font-weight="bold" fill="#0284c7">Air</text></svg>`,
+                options: ["1000 cm³", "250 cm³", "100 cm³", "500 cm³"],
+                correct: 3,
+                rationale: "Isipadu penuh tangki = 10 × 10 × 10 = 1000 cm³. Memandangkan ia hanya separuh penuh, isipadu air = 1000 cm³ ÷ 2 = 500 cm³."
+            }
+        ];
+
+        // Pembolehubah State
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        // Elemen DOM
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const endScreen = document.getElementById('end-screen');
+        const visualContainer = document.getElementById('visual-container');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackEl = document.getElementById('feedback');
+        const feedbackMsg = document.getElementById('feedback-message');
+        const feedbackRat = document.getElementById('feedback-rationale');
+        const nextBtn = document.getElementById('next-btn');
+        const currentQuestionEl = document.getElementById('current-question');
+        const totalQuestionsEl = document.getElementById('total-questions');
+        const scoreEl = document.getElementById('score');
+
+        // Initial setup
+        totalQuestionsEl.innerText = quizData.length;
+
+        // Fungsi Memulakan Permainan
+        function startGame() {
+            startScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            gameScreen.classList.add('fade-in');
+            currentQuestionIndex = 0;
+            score = 0;
+            updateScore();
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const currentQuiz = quizData[currentQuestionIndex];
+            
+            // Reset state UI
+            feedbackEl.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            optionsContainer.innerHTML = '';
+            
+            // Kemaskini teks dan imej
+            currentQuestionEl.innerText = currentQuestionIndex + 1;
+            questionText.innerText = currentQuiz.question;
+            visualContainer.innerHTML = currentQuiz.svg;
+
+            // Membina butang jawapan
+            currentQuiz.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.innerText = option;
+                // Styling butang yang menarik
+                button.className = 'btn-option bg-white border-4 border-slate-200 text-slate-700 font-bold py-4 px-6 rounded-2xl text-xl hover:border-sky-400 hover:text-sky-600 focus:outline-none shadow-sm';
+                button.onclick = () => selectAnswer(index, button);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function selectAnswer(selectedIndex, buttonElement) {
+            const currentQuiz = quizData[currentQuestionIndex];
+            const isCorrect = selectedIndex === currentQuiz.correct;
+            
+            // Kunci semua butang selepas dipilih
+            const buttons = optionsContainer.querySelectorAll('button');
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:border-sky-400', 'hover:text-sky-600', 'hover:-translate-y-1');
+                
+                if(idx === currentQuiz.correct) {
+                    // Papar jawapan betul (Hijau)
+                    btn.classList.remove('border-slate-200', 'text-slate-700');
+                    btn.classList.add('border-green-500', 'bg-green-100', 'text-green-800');
+                } else if (idx === selectedIndex && !isCorrect) {
+                    // Papar jawapan salah yang dipilih (Merah)
+                    btn.classList.remove('border-slate-200', 'text-slate-700');
+                    btn.classList.add('border-red-500', 'bg-red-100', 'text-red-800');
+                } else {
+                    // Pudarkan butang lain
+                    btn.classList.add('opacity-40');
+                }
+            });
+
+            // Papar Maklum Balas
+            feedbackEl.classList.remove('hidden');
+            feedbackEl.className = 'mt-6 text-center rounded-2xl py-5 px-6 fade-in shadow-inner border-4';
+            nextBtn.classList.remove('hidden');
+            
+            if (isCorrect) {
+                score++;
+                updateScore();
+                feedbackEl.classList.add('bg-green-50', 'border-green-300');
+                feedbackMsg.innerHTML = "✅ Tepat Sekali!";
+                feedbackMsg.className = "font-bold text-2xl mb-2 text-green-700";
+                feedbackRat.innerHTML = currentQuiz.rationale;
+                feedbackRat.className = "text-base md:text-lg font-medium text-green-800";
+            } else {
+                gameScreen.classList.add('shake');
+                setTimeout(() => gameScreen.classList.remove('shake'), 500);
+                
+                feedbackEl.classList.add('bg-red-50', 'border-red-300');
+                feedbackMsg.innerHTML = "❌ Kurang Tepat";
+                feedbackMsg.className = "font-bold text-2xl mb-2 text-red-700";
+                feedbackRat.innerHTML = `<strong>Cara Pengiraan:</strong><br>${currentQuiz.rationale}`;
+                feedbackRat.className = "text-base md:text-lg font-medium text-red-800";
+            }
+            
+            // Skrol automatik ke bawah supaya mesej nampak di peranti mudah alih
+            setTimeout(() => {
+                feedbackEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                gameScreen.classList.remove('fade-in');
+                // Trigger reflow untuk mainkan animasi semula
+                void gameScreen.offsetWidth;
+                gameScreen.classList.add('fade-in');
+                loadQuestion();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                endGame();
+            }
+        }
+
+        function updateScore() {
+            scoreEl.innerText = score;
+        }
+
+        function endGame() {
+            gameScreen.classList.add('hidden');
+            endScreen.classList.remove('hidden');
+            
+            document.getElementById('final-score').innerText = score;
+            
+            const endMessage = document.getElementById('end-message');
+            const endSub = document.getElementById('end-submessage');
+            
+            // Penilaian Skor
+            if (score === 15) {
+                endMessage.innerText = "🌟 Sempurna! Anda Adalah Master Ruang! 🌟";
+                endMessage.className = "text-3xl font-black text-yellow-500 mt-4 drop-shadow-md";
+                endSub.innerText = "Semua jawapan tepat. Pencapaian yang sangat membanggakan!";
+            } else if (score >= 10) {
+                endMessage.innerText = "🎉 Cemerlang! Usaha yang Hebat!";
+                endMessage.className = "text-3xl font-bold text-green-500 mt-4";
+                endSub.innerText = "Anda mempunyai pemahaman yang sangat baik tentang bentuk dan ruang.";
+            } else if (score >= 6) {
+                endMessage.innerText = "👍 Bagus! Teruskan Usaha.";
+                endMessage.className = "text-3xl font-bold text-blue-500 mt-4";
+                endSub.innerText = "Banyakkan lagi latihan, anda pasti boleh dapat markah penuh!";
+            } else {
+                endMessage.innerText = "💪 Jangan Putus Asa!";
+                endMessage.className = "text-3xl font-bold text-red-500 mt-4";
+                endSub.innerText = "Ulang kaji semula rumus Luas, Isipadu dan Perimeter, kemudian cuba lagi ya!";
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetGame() {
+            endScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
